@@ -11,7 +11,7 @@ public class Servidor {
     }
 
     public Servidor() {
-        JFrame frame = new JFrame("Servidor");
+        JFrame frame = new JFrame("Servidores");
         frame.setContentPane(pnl);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.pack();
