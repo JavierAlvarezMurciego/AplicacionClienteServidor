@@ -2,15 +2,18 @@ import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.*;
-import java.lang.reflect.Field;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.List;
 
 public class Controlador implements ActionListener {
     private Servidor servidor;
     private Cliente cliente;
     private File transferencia;
     private File fichDescarga;
+    private Socket socket;
+    private List<Transferencia> lista;
+    private DefaultListModel<String> listModel;
 
     public Controlador(Servidor servidor){
         this.servidor = servidor;
@@ -36,11 +39,13 @@ public class Controlador implements ActionListener {
         String elige=e.getActionCommand();
         switch (elige){
             case "Iniciar":
+
                 try {
                     ServerSocket serverSocket = new ServerSocket(55555);
                     do {
                         System.out.println("Se inicia el servidor");
-                        Socket socket= serverSocket.accept();
+                        socket= serverSocket.accept();
+                        HiloCliente hiloCliente = new HiloCliente(socket);
                         System.out.println("Cliente conectado");
                     }while (!serverSocket.isClosed());
                 } catch (IOException ioException) {
@@ -48,6 +53,15 @@ public class Controlador implements ActionListener {
                 }
                 break;
             case "Conectar":
+                //Hilo infinito de espera de escucha a clientes
+
+                //Cuando un cliente se conecta, crear un hilo, que se quede a la espera de recibir 3 opciones
+                //-Obtener lista -Subir fichero -Descargar fichero
+
+                //Crear hilo
+                HilosCliente hilo = new HilosCliente();
+                hilo.start();
+
                 try {
                     //Leer ip de la gui
                     System.out.println(cliente.gettextfIp().getText());
@@ -81,6 +95,36 @@ public class Controlador implements ActionListener {
                 if (evt == JFileChooser.APPROVE_OPTION) {
                     fichDescarga = descarga.getSelectedFile();
                 }
+            case "Refrescar":
+
+                SwingWorker<List<Transferencia>, Void> worker = new SwingWorker<List<Transferencia>, Void>() {
+                    @Override
+                    protected List<Transferencia> doInBackground() throws Exception {
+                        //Buscar en el servidor los archivos disponibles
+                        ObjectInputStream entrada = new ObjectInputStream(socket.getInputStream());
+                        ObjectOutputStream salida = new ObjectOutputStream(socket.getOutputStream());
+
+                        lista = (List<Transferencia>) entrada.readObject();
+
+                        return lista;
+                    }
+
+                    @Override
+                    protected void done() {
+                        try {
+                            for(int i=0; i < lista.size(); i++){
+                                DefaultListModel modelo = new DefaultListModel();
+                                cliente.getList1().setModel(listModel);
+                                modelo.addElement(lista.get(i).getNombre());
+                                cliente.getList1().setModel(modelo);
+                            }
+
+                        } catch (Exception ex) {
+                            ex.printStackTrace();
+                        }
+                    }
+                };
+
         }
     }
 }

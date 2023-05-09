@@ -22,6 +22,9 @@ public class Cliente {
     public JButton getbDescargar() {
         return bDescargar;
     }
+    public JList getList1() {
+        return list1;
+    }
 
 
     public Cliente() {
@@ -32,6 +35,7 @@ public class Cliente {
         frame.setLocationRelativeTo(null);
         frame.setSize(400,400);
         frame.setVisible(true);
+
     }
 
     public static void main(String[] args) {
