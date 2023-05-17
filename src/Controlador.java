@@ -90,12 +90,12 @@ public class Controlador implements ActionListener {
                     try {
                         //Leer ip de la gui
                         System.out.println(cliente.gettextfIp().getText());
-                        Socket socket = new Socket(cliente.gettextfIp().getText(),55555);
+                        socket = new Socket(cliente.gettextfIp().getText(),55555);
                         //Si hacemos esto puede que no nos aseguremos de que realmente esté creado el input y outputstream
                         cliente.getbSubir().setEnabled(true);
                         cliente.getbDescargar().setEnabled(true);
                         //entradaCliente = new ObjectInputStream(socket.getInputStream());
-                        salidaCliente = new ObjectOutputStream(socket.getOutputStream());
+
                         try {
                             salidaClientePrint = new PrintWriter(socket.getOutputStream(), true);
                             salidaClientePrint.println("hola servidor");
@@ -114,31 +114,51 @@ public class Controlador implements ActionListener {
 
             case "Subir":
                 salidaClientePrint.println("Subir");
-                JFileChooser selecciona = new JFileChooser();
+                SwingWorker<List<Transferencia>, Void> workerSubir = new SwingWorker<List<Transferencia>, Void>() {
+                    @Override
+                    protected List<Transferencia> doInBackground() throws Exception {
+                        JFileChooser selecciona = new JFileChooser();
 
-                int accion = selecciona.showSaveDialog(null);
-                if (accion == JFileChooser.APPROVE_OPTION) {
-                    //Crear hilo swingworker que notifique que va a enviar un fichero
-                    transferencia = selecciona.getSelectedFile();
-                    try {
-                        FileInputStream lectorFichero = new FileInputStream(transferencia);
-                        salidaCliente.writeLong(transferencia.length());
+                        int accion = selecciona.showSaveDialog(null);
+                        System.out.println(accion);
+                        if (accion == 0) {
+                            //Crear hilo swingworker que notifique que va a enviar un fichero
+                            transferencia = selecciona.getSelectedFile();
+                            try {
+                                //Descomentar siguiente linea, se queda ahi parado no se por que
+                                salidaCliente = new ObjectOutputStream(socket.getOutputStream());
+                                System.out.println("Creado object output");
 
-                        byte[] buffer = new byte[1024];
-                        int bytesLeidos = 0;
-                        while( (bytesLeidos = lectorFichero.read(buffer)) > 0){
-                            //Me aseguro de que se escriben todos lo bytes del buffer
-                            salidaCliente.flush();
-                            //Envio datos a través del socket
-                            salidaCliente.write(buffer, 0, bytesLeidos);
+                                salidaCliente.writeLong(transferencia.length());
+                                System.out.println("Enviada longitud de archivo: "+transferencia.length());
 
+                                FileInputStream lectorFichero = new FileInputStream(transferencia);
+                                System.out.println("Creado fileinput: "+lectorFichero);
+
+                                byte[] buffer = new byte[1024];
+                                int bytesLeidos = 0;
+                                System.out.println("Comienza envio del archivo");
+                                while( (bytesLeidos = lectorFichero.read(buffer)) > 0){
+                                    //Envio datos a través del socket
+                                    salidaCliente.write(buffer, 0, bytesLeidos);
+                                    //Me aseguro de que se escriben todos lo bytes del buffer
+                                    salidaCliente.flush();
+
+                                }
+                                lectorFichero.close();
+                            } catch (IOException ex) {
+                                throw new RuntimeException(ex);
+                            }
                         }
-                        lectorFichero.close();
-                    } catch (IOException ex) {
-                        throw new RuntimeException(ex);
+                        return null;
                     }
-                }
 
+                    @Override
+                    protected void done() {
+
+                    }
+                };
+                workerSubir.execute();
                 break;
 
             case "Descargar":

@@ -22,12 +22,17 @@ public class HiloCliente extends Thread {
                     switch(mensajeRecibido) {
                         case "Subir":
                             try {
-                                File ficheroDestino = new File("C:\\Users\\javia\\Documents\\documento3");
+                                File ficheroDestino = new File("C:\\Users\\javia\\Documents\\archivo2.txt");
+                                System.out.println("creado fichero destino");
                                 FileOutputStream escritorFichero = new FileOutputStream(ficheroDestino);
+                                System.out.println("creado file output stream");
 
+                                //Se queda aqui parado
                                 this.entradaCliente = new ObjectInputStream(cliente.getInputStream());
+                                System.out.println("creado object input stream");
 
                                 long fileSize = entradaCliente.readLong();
+                                System.out.println("leido tamaño del fichero "+fileSize+" bytes");
 
                                 byte[] buffer = new byte[1024];
                                 int bytesLeidos;
@@ -35,8 +40,10 @@ public class HiloCliente extends Thread {
                                 while( totalLeido < fileSize && (bytesLeidos = entradaCliente.read(buffer)) > 0 ){
                                     escritorFichero.write(buffer, 0, bytesLeidos);
                                     totalLeido += bytesLeidos;
+                                    System.out.println("descargando fichero");
                                 }
                                 escritorFichero.close();
+                                entradaCliente.close();
 
                                 System.out.println(ficheroDestino.getName());
 
@@ -46,7 +53,7 @@ public class HiloCliente extends Thread {
                             break;
                         case "Descargar":
                             try {
-                                this.salidaCliente = new ObjectOutputStream(cliente.getOutputStream());
+                                this.entradaCliente = new ObjectInputStream(cliente.getInputStream());
                             } catch (IOException e) {
                                 throw new RuntimeException(e);
                             }
