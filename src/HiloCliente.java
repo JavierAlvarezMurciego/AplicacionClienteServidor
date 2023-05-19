@@ -22,17 +22,25 @@ public class HiloCliente extends Thread {
                     switch(mensajeRecibido) {
                         case "Subir":
                             try {
-                                File ficheroDestino = new File("C:\\Users\\javia\\Documents\\archivo2.txt");
-                                System.out.println("creado fichero destino");
-                                FileOutputStream escritorFichero = new FileOutputStream(ficheroDestino);
-                                System.out.println("creado file output stream");
-
                                 //Se queda aqui parado
                                 this.entradaCliente = new ObjectInputStream(cliente.getInputStream());
                                 System.out.println("creado object input stream");
 
                                 long fileSize = entradaCliente.readLong();
                                 System.out.println("leido tamaño del fichero "+fileSize+" bytes");
+
+                                String nombre = "error.txt";
+                                try {
+                                    nombre = (String) entradaCliente.readObject();
+                                    System.out.println("leido nombre del fichero "+nombre);
+                                } catch (ClassNotFoundException e) {
+                                    throw new RuntimeException(e);
+                                }
+
+                                File ficheroDestino = new File("C:\\Users\\javia\\Downloads\\"+nombre);
+                                System.out.println("creado fichero destino");
+                                FileOutputStream escritorFichero = new FileOutputStream(ficheroDestino);
+                                System.out.println("creado file output stream");
 
                                 byte[] buffer = new byte[1024];
                                 int bytesLeidos;

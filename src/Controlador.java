@@ -132,6 +132,9 @@ public class Controlador implements ActionListener {
                                 salidaCliente.writeLong(transferencia.length());
                                 System.out.println("Enviada longitud de archivo: "+transferencia.length());
 
+                                salidaCliente.writeObject(transferencia.getName());
+                                System.out.println("Enviado nombre de archivo: "+transferencia.getName());
+
                                 FileInputStream lectorFichero = new FileInputStream(transferencia);
                                 System.out.println("Creado fileinput: "+lectorFichero);
 
