@@ -32,6 +32,7 @@ public class Controlador implements ActionListener {
         cliente.getbConectar().addActionListener(listener);
         cliente.getbSubir().addActionListener(listener);
         cliente.getbDescargar().addActionListener(listener);
+        cliente.getbRefrescar().addActionListener(listener);
     }
 
     private void vincularServidor(ActionListener listener){
@@ -94,6 +95,8 @@ public class Controlador implements ActionListener {
                         //Si hacemos esto puede que no nos aseguremos de que realmente esté creado el input y outputstream
                         cliente.getbSubir().setEnabled(true);
                         cliente.getbDescargar().setEnabled(true);
+                        cliente.getbRefrescar().setEnabled(true);
+
                         //entradaCliente = new ObjectInputStream(socket.getInputStream());
 
                         try {
@@ -167,7 +170,69 @@ public class Controlador implements ActionListener {
             case "Descargar":
                 salidaClientePrint.println("Descargar");
                 System.out.println("pulsado boton descargar");
-                salidaClientePrint.println("hola servidor desde descargas");
+
+                SwingWorker<Void,Void> workerDescargar = new SwingWorker<Void, Void>() {
+                    @Override
+                    protected Void doInBackground() throws Exception {
+                        //Tengo que enviar al servidor el archivo elegido del jList
+                        Transferencia t = (Transferencia) cliente.getList1().getSelectedValue();
+                        //System.out.println(t.getRuta().toString());
+                        //PrintWriter writer = new PrintWriter(String.valueOf(t));
+                        //writer.println(t.getRuta().toString());
+                        salidaClientePrint.println(t.getRuta().toString());
+//                        ObjectOutputStream fout = new ObjectOutputStream(t.getRuta());
+//                        fout.write();
+
+                        try {
+                            //Se queda aqui parado
+                            entradaCliente = new ObjectInputStream(socket.getInputStream());
+                            System.out.println("creado object input stream");
+
+                            long fileSize = entradaCliente.readLong();
+                            System.out.println("leido tamaño del fichero "+fileSize+" bytes");
+
+                            String nombre = "error.txt";
+                            try {
+                                nombre = (String) entradaCliente.readObject();
+                                System.out.println("leido nombre del fichero "+nombre);
+                            } catch (ClassNotFoundException ep) {
+                                throw new RuntimeException(ep);
+                            }
+
+                            File ficheroDestino = new File("C:\\Users\\USUARIO\\Desktop\\" + nombre);
+                            System.out.println("creado fichero destino");
+                            FileOutputStream escritorFichero = new FileOutputStream(ficheroDestino);
+                            System.out.println("creado file output stream");
+
+                            byte[] buffer = new byte[1024];
+                            int bytesLeidos;
+                            long totalLeido = 0;
+                            while( totalLeido < fileSize && (bytesLeidos = entradaCliente.read(buffer)) > 0 ){
+                                escritorFichero.write(buffer, 0, bytesLeidos);
+                                totalLeido += bytesLeidos;
+                                System.out.println("descargando fichero");
+                            }
+
+                            //escritorFichero.close();
+                            //entradaCliente.close();
+
+                            System.out.println(ficheroDestino.getName());
+
+                        } catch (IOException ex) {
+                            throw new RuntimeException(ex);
+                        }
+
+                        return null;
+                    }
+
+                    @Override
+                    protected void done() {
+
+                    }
+                };
+
+                workerDescargar.execute();
+
 
                 /*JFileChooser descarga = new JFileChooser();
                 int evt = descarga.showSaveDialog(null);
@@ -175,7 +240,7 @@ public class Controlador implements ActionListener {
                     SwingWorker<List<Transferencia>, Void> workerSubir = new SwingWorker<List<Transferencia>, Void>() {
                         @Override
                         protected List<Transferencia> doInBackground() throws Exception {
-                            fichDescarga = descarga.getSelectedFile();
+                                fichDescarga = descarga.getSelectedFile();
 
                             return lista;
                         }
@@ -199,31 +264,30 @@ public class Controlador implements ActionListener {
                 }*/
                 break;
             case "Refrescar":
+                //Mandar mensaje Refrescar al servidor para que sepa que lo hemos mandado
                 salidaClientePrint.println("Refrescar");
-                SwingWorker<List<Transferencia>, Void> worker2 = new SwingWorker<List<Transferencia>, Void>() {
+                SwingWorker<List<Transferencia>, Void> workerRefrescar = new SwingWorker<List<Transferencia>, Void>() {
                     @Override
                     protected List<Transferencia> doInBackground() throws Exception {
-                        //Buscar en el servidor los archivos disponibles
                         ObjectInputStream entrada = new ObjectInputStream(socket.getInputStream());
-                        ObjectOutputStream salida = new ObjectOutputStream(socket.getOutputStream());
-                        //                    BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-//                    PrintWriter printWriter = new PrintWriter(socket.getOutputStream(),true);
-//                    printWriter.println("Lista de elementos");
-//
-//                    String respuesta = bufferedReader.readLine();
-//                    System.out.println("Lista de elementos"+respuesta);
-                        lista = (List<Transferencia>) entrada.readObject();
+                        System.out.println("Creado Objeto entrada");
+                        List<Transferencia> listaRecibida = (List<Transferencia>)entrada.readObject();
+                        for (int i=0; i<listaRecibida.size(); i++) {
+                            System.out.println(listaRecibida.get(i));
+                        }
 
-                        return lista;
+                        return listaRecibida;
                     }
 
                     @Override
                     protected void done() {
                         try {
-                            for(int i=0; i < lista.size(); i++){
-                                DefaultListModel modelo = new DefaultListModel();
+                            List<Transferencia> resultado = get();
+                            listModel = new DefaultListModel<>();
+                            DefaultListModel modelo = new DefaultListModel();
+                            for(int i=0; i < resultado.size(); i++){
                                 cliente.getList1().setModel(listModel);
-                                modelo.addElement(lista.get(i).getNombre());
+                                modelo.addElement(resultado.get(i));
                                 cliente.getList1().setModel(modelo);
                             }
 
@@ -232,6 +296,8 @@ public class Controlador implements ActionListener {
                         }
                     }
                 };
+                workerRefrescar.execute();
+                break;
 
         }
     }

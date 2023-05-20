@@ -22,6 +22,9 @@ public class Cliente {
     public JButton getbDescargar() {
         return bDescargar;
     }
+    public JButton getbRefrescar() {
+        return bRefrescar;
+    }
     public JList getList1() {
         return list1;
     }
