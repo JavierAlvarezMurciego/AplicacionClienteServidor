@@ -199,7 +199,7 @@ public class Controlador implements ActionListener {
                                 throw new RuntimeException(ep);
                             }
 
-                            File ficheroDestino = new File("C:\\Users\\USUARIO\\Desktop\\" + nombre);
+                            File ficheroDestino = new File("C:\\Users\\USUARIO\\Desktop\\Cliente\\" + nombre);
                             System.out.println("creado fichero destino");
                             FileOutputStream escritorFichero = new FileOutputStream(ficheroDestino);
                             System.out.println("creado file output stream");

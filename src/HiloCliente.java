@@ -69,9 +69,6 @@ public class HiloCliente extends Thread {
 
                             System.out.println("Pulsado descarga");
                             try {
-                                //Descomentar siguiente linea, se queda ahi parado no se por que
-                               //BufferedReader entrada = new BufferedReader(new InputStreamReader(cliente.getInputStream()));
-                                System.out.println(entrada.readLine());
                                 File transferencia2 = new File(entrada.readLine());
 
                                 salidaServidor = new ObjectOutputStream(cliente.getOutputStream());
