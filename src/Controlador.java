@@ -151,6 +151,7 @@ public class Controlador implements ActionListener {
                                     salidaCliente.flush();
 
                                 }
+                                cliente.getLblRuta().setText("Envío completado, " + transferencia.getAbsolutePath() );
                                 lectorFichero.close();
                             } catch (IOException ex) {
                                 throw new RuntimeException(ex);
@@ -212,7 +213,7 @@ public class Controlador implements ActionListener {
                                 totalLeido += bytesLeidos;
                                 System.out.println("descargando fichero");
                             }
-
+                            cliente.getLblRuta().setText("Transferencia completada, " + ficheroDestino.getName());
                             //escritorFichero.close();
                             //entradaCliente.close();
 

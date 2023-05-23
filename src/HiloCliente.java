@@ -64,7 +64,7 @@ public class HiloCliente extends Thread {
                             }
                             break;
                         case "Descargar":
-                                //Crear hilo swingworker que notifique que va a enviar un fichero
+                            //Crear hilo swingworker que notifique que va a enviar un fichero
 
 
                             System.out.println("Pulsado descarga");
@@ -87,10 +87,10 @@ public class HiloCliente extends Thread {
                                 int bytesLeidos = 0;
                                 System.out.println("Comienza envio del archivo");
                                 while( (bytesLeidos = lectorFichero.read(buffer)) > 0){
-                                        //Envio datos a través del socket
-                                        salidaServidor.write(buffer, 0, bytesLeidos);
-                                        //Me aseguro de que se escriben todos lo bytes del buffer
-                                        salidaServidor.flush();
+                                    //Envio datos a través del socket
+                                    salidaServidor.write(buffer, 0, bytesLeidos);
+                                    //Me aseguro de que se escriben todos lo bytes del buffer
+                                    salidaServidor.flush();
 
                                 }
                                 lectorFichero.close();
@@ -118,6 +118,7 @@ public class HiloCliente extends Thread {
                                 }
                                 System.out.println("Lista impresa");
                                 salidaServidor.writeObject(lista);
+                                salidaServidor.reset();
 
                             } catch (Exception e) {
                                 e.printStackTrace();
@@ -134,4 +135,3 @@ public class HiloCliente extends Thread {
     }
 
 }
-

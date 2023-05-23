@@ -9,6 +9,7 @@ public class Cliente {
     private JButton bDescargar;
     private JButton bSubir;
     private JButton bRefrescar;
+    private JLabel lblRuta;
 
     public JButton getbConectar() {
         return bConectar;
@@ -28,6 +29,7 @@ public class Cliente {
     public JList getList1() {
         return list1;
     }
+    public JLabel getLblRuta(){return lblRuta;}
 
 
     public Cliente() {
