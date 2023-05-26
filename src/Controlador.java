@@ -4,6 +4,8 @@ import java.awt.event.ActionListener;
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class Controlador implements ActionListener {
@@ -15,7 +17,7 @@ public class Controlador implements ActionListener {
     ObjectOutputStream salidaCliente;
     PrintWriter salidaClientePrint;
     private Socket socket;
-    private List<Transferencia> lista;
+    private List<Transferencia> lista = Collections.synchronizedList(new ArrayList<>());
     private DefaultListModel<String> listModel;
 
     public Controlador(Servidor servidor){
@@ -49,7 +51,7 @@ public class Controlador implements ActionListener {
             int indicePunto = nombreArchivo.lastIndexOf('.');
 
             if (indicePunto != -1) {
-                nuevoNombre = contador + "-" + nombreArchivo.substring(0, indicePunto) + "." + nombreArchivo.substring(indicePunto);
+                nuevoNombre = contador + "-" + nombreArchivo.substring(0, indicePunto) + nombreArchivo.substring(indicePunto);
             } else {
                 nuevoNombre = contador +  "-" + nombreArchivo;
             }
@@ -73,7 +75,7 @@ public class Controlador implements ActionListener {
                             do {
                                 System.out.println("Se inicia el servidor");
                                 socket= serverSocket.accept();
-                                HiloCliente hiloCliente = new HiloCliente(socket);
+                                HiloCliente hiloCliente = new HiloCliente(socket, lista);
                                 System.out.println("Cliente conectado");
                                 hiloCliente.start();
                             }while (!serverSocket.isClosed());
@@ -245,6 +247,9 @@ public class Controlador implements ActionListener {
                             //entradaCliente.close();
 
                             System.out.println(ficheroDestino.getName());
+
+                            //escritorFichero.close();
+                            //entradaCliente.close();
 
                         } catch (IOException ex) {
                             throw new RuntimeException(ex);

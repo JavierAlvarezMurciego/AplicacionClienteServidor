@@ -12,8 +12,10 @@ public class HiloCliente extends Thread {
     private BufferedReader entrada;
     private List<Transferencia> lista;
 
-    public HiloCliente(Socket cliente) {
+    public HiloCliente(Socket cliente, List<Transferencia> lista) {
+
         this.cliente = cliente;
+        this.lista = lista;
     }
     @Override
     public void run() {
