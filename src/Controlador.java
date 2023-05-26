@@ -39,6 +39,27 @@ public class Controlador implements ActionListener {
 
         servidor.getbIniciar().addActionListener(listener);
     }
+
+    private String agregarNumeroAlNombre(String nombreArchivo) {
+        String nuevoNombre = nombreArchivo;
+        int contador = 1;
+
+        // Verificar si el archivo con el nombre original existe
+        while (new File(nuevoNombre).exists()) {
+            int indicePunto = nombreArchivo.lastIndexOf('.');
+
+            if (indicePunto != -1) {
+                nuevoNombre = contador + "-" + nombreArchivo.substring(0, indicePunto) + "." + nombreArchivo.substring(indicePunto);
+            } else {
+                nuevoNombre = contador +  "-" + nombreArchivo;
+            }
+
+            contador++;
+        }
+
+        return nuevoNombre;
+    }
+
     @Override
     public void actionPerformed(ActionEvent e) {
         String elige=e.getActionCommand();
@@ -200,7 +221,13 @@ public class Controlador implements ActionListener {
                                 throw new RuntimeException(ep);
                             }
 
-                            File ficheroDestino = new File("C:\\Users\\USUARIO\\Desktop\\Cliente\\" + nombre);
+                            //Recorrer con un for la carpeta actual y ver si hay algun archivo
+                            //que se llame igual que el que he recibido
+                            //si es así le añado un número delante
+
+
+
+                            File ficheroDestino = new File(agregarNumeroAlNombre(nombre));
                             System.out.println("creado fichero destino");
                             FileOutputStream escritorFichero = new FileOutputStream(ficheroDestino);
                             System.out.println("creado file output stream");

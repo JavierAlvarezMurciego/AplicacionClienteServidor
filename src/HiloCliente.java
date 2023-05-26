@@ -10,6 +10,7 @@ public class HiloCliente extends Thread {
     private ObjectInputStream entradaCliente;
     private ObjectOutputStream salidaServidor;
     private BufferedReader entrada;
+    private List<Transferencia> lista;
 
     public HiloCliente(Socket cliente) {
         this.cliente = cliente;
@@ -19,6 +20,7 @@ public class HiloCliente extends Thread {
 
         try {
             entrada = new BufferedReader(new InputStreamReader(cliente.getInputStream()));
+
 
             while (true) {
                 String mensajeRecibido = entrada.readLine();
@@ -41,7 +43,7 @@ public class HiloCliente extends Thread {
                                     throw new RuntimeException(e);
                                 }
 
-                                File ficheroDestino = new File("C:\\Users\\USUARIO\\IdeaProjects\\AplicacionClienteServidor\\src\\ArchivoServidor\\" + nombre);
+                                File ficheroDestino = new File( nombre);
                                 System.out.println("creado fichero destino");
                                 FileOutputStream escritorFichero = new FileOutputStream(ficheroDestino);
                                 System.out.println("creado file output stream");
@@ -58,6 +60,8 @@ public class HiloCliente extends Thread {
                                 //entradaCliente.close();
 
                                 System.out.println(ficheroDestino.getName());
+
+                                lista.add(new Transferencia(ficheroDestino.getName(),ficheroDestino));
 
                             } catch (IOException e) {
                                 throw new RuntimeException(e);
@@ -104,21 +108,22 @@ public class HiloCliente extends Thread {
                                 this.salidaServidor = new ObjectOutputStream(cliente.getOutputStream());
                                 System.out.println("Creado objeto output");
 
-                                List<Transferencia> lista = Collections.synchronizedList(new ArrayList<>());
-                                String ruta = "C:\\Users\\USUARIO\\IdeaProjects\\AplicacionClienteServidor\\src\\ArchivoServidor\\";
-                                File directorio = new File(ruta);
-                                String[] nombresArchivos = directorio.list();
-                                File[] rutas = directorio.listFiles();
-                                for (int i=0; i<nombresArchivos.length; i++) {
-                                    Transferencia transferencia = new Transferencia(nombresArchivos[i],rutas[i]);
-                                    lista.add(transferencia);
-                                }
-                                for (int i=0; i<lista.size(); i++) {
-                                    System.out.println(lista.get(i));
-                                }
-                                System.out.println("Lista impresa");
+
+//                                String ruta = ".\\ArchivoServidor\\";
+//                                File directorio = new File(ruta);
+//                                String[] nombresArchivos = directorio.list();
+//                                File[] rutas = directorio.listFiles();
+//
+//                                for (int i=0; i<nombresArchivos.length; i++) {
+//                                    Transferencia transferencia = new Transferencia(nombresArchivos[i],rutas[i]);
+//                                    lista.add(transferencia);
+//                                }
+//                                for (int i=0; i<lista.size(); i++) {
+//                                    System.out.println(lista.get(i));
+//                                }
+//                                System.out.println("Lista impresa");
                                 salidaServidor.writeObject(lista);
-                                salidaServidor.reset();
+                                //salidaServidor.reset();
 
                             } catch (Exception e) {
                                 e.printStackTrace();
