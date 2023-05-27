@@ -70,11 +70,9 @@ public class HiloCliente extends Thread {
                             }
                             break;
                         case "Descargar":
-                            //Crear hilo swingworker que notifique que va a enviar un fichero
-
-
                             System.out.println("Pulsado descarga");
                             try {
+                                //readLine lee un String del socket
                                 File transferencia2 = new File(entrada.readLine());
 
                                 salidaServidor = new ObjectOutputStream(cliente.getOutputStream());
@@ -109,21 +107,7 @@ public class HiloCliente extends Thread {
                             try {
                                 this.salidaServidor = new ObjectOutputStream(cliente.getOutputStream());
                                 System.out.println("Creado objeto output");
-
-
-//                                String ruta = ".\\ArchivoServidor\\";
-//                                File directorio = new File(ruta);
-//                                String[] nombresArchivos = directorio.list();
-//                                File[] rutas = directorio.listFiles();
-//
-//                                for (int i=0; i<nombresArchivos.length; i++) {
-//                                    Transferencia transferencia = new Transferencia(nombresArchivos[i],rutas[i]);
-//                                    lista.add(transferencia);
-//                                }
-//                                for (int i=0; i<lista.size(); i++) {
-//                                    System.out.println(lista.get(i));
-//                                }
-//                                System.out.println("Lista impresa");
+                                //Se envía el objeto lista al cliente
                                 salidaServidor.writeObject(lista);
                                 //salidaServidor.reset();
 

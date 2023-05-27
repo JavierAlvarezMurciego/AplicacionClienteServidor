@@ -12,10 +12,9 @@ public class Controlador implements ActionListener {
     private Servidor servidor;
     private Cliente cliente;
     private File transferencia;
-    private File fichDescarga;
-    ObjectInputStream entradaCliente;
-    ObjectOutputStream salidaCliente;
-    PrintWriter salidaClientePrint;
+    private ObjectInputStream entradaCliente;
+    private ObjectOutputStream salidaCliente;
+    private PrintWriter salidaClientePrint;
     private Socket socket;
     private List<Transferencia> lista = Collections.synchronizedList(new ArrayList<>());
     private DefaultListModel<String> listModel;
@@ -83,28 +82,22 @@ public class Controlador implements ActionListener {
                             ioException.printStackTrace();
                         }
 
-                        //ObjectInputStream entrada = new ObjectInputStream(socket.getInputStream());
-                        //ObjectOutputStream salida = new ObjectOutputStream(socket.getOutputStream());
-
-                        //lista = (List<Transferencia>) entrada.readObject();
-
-                        //return lista;
                         return null;
                     }
 
                     @Override
                     protected void done() {
-                        try {
-                            for(int i=0; i < lista.size(); i++){
-                                DefaultListModel modelo = new DefaultListModel();
-                                cliente.getList1().setModel(listModel);
-                                modelo.addElement(lista.get(i).getNombre());
-                                cliente.getList1().setModel(modelo);
-                            }
-
-                        } catch (Exception ex) {
-                            ex.printStackTrace();
-                        }
+//                        try {
+//                            for(int i=0; i < lista.size(); i++){
+//                                DefaultListModel modelo = new DefaultListModel();
+//                                cliente.getList1().setModel(listModel);
+//                                modelo.addElement(lista.get(i).getNombre());
+//                                cliente.getList1().setModel(modelo);
+//                            }
+//
+//                        } catch (Exception ex) {
+//                            ex.printStackTrace();
+//                        }
                     }
                 };
                 worker.execute();
@@ -167,6 +160,9 @@ public class Controlador implements ActionListener {
                                 byte[] buffer = new byte[1024];
                                 int bytesLeidos = 0;
                                 System.out.println("Comienza envio del archivo");
+                                cliente.getbDescargar().setEnabled(false);
+                                cliente.getbSubir().setEnabled(false);
+                                cliente.getbRefrescar().setEnabled(false);
                                 while( (bytesLeidos = lectorFichero.read(buffer)) > 0){
                                     //Envio datos a través del socket
                                     salidaCliente.write(buffer, 0, bytesLeidos);
@@ -175,6 +171,9 @@ public class Controlador implements ActionListener {
 
                                 }
                                 cliente.getLblRuta().setText("Envío completado, " + transferencia.getAbsolutePath() );
+                                cliente.getbRefrescar().setEnabled(true);
+                                cliente.getbSubir().setEnabled(true);
+                                cliente.getbDescargar().setEnabled(true);
                                 lectorFichero.close();
                             } catch (IOException ex) {
                                 throw new RuntimeException(ex);
@@ -200,12 +199,7 @@ public class Controlador implements ActionListener {
                     protected Void doInBackground() throws Exception {
                         //Tengo que enviar al servidor el archivo elegido del jList
                         Transferencia t = (Transferencia) cliente.getList1().getSelectedValue();
-                        //System.out.println(t.getRuta().toString());
-                        //PrintWriter writer = new PrintWriter(String.valueOf(t));
-                        //writer.println(t.getRuta().toString());
                         salidaClientePrint.println(t.getRuta().toString());
-//                        ObjectOutputStream fout = new ObjectOutputStream(t.getRuta());
-//                        fout.write();
 
                         try {
                             //Se queda aqui parado
@@ -237,19 +231,19 @@ public class Controlador implements ActionListener {
                             byte[] buffer = new byte[1024];
                             int bytesLeidos;
                             long totalLeido = 0;
+                            cliente.getbDescargar().setEnabled(false);
+                            cliente.getbRefrescar().setEnabled(false);
+                            cliente.getbSubir().setEnabled(false);
                             while( totalLeido < fileSize && (bytesLeidos = entradaCliente.read(buffer)) > 0 ){
                                 escritorFichero.write(buffer, 0, bytesLeidos);
                                 totalLeido += bytesLeidos;
                                 System.out.println("descargando fichero");
                             }
                             cliente.getLblRuta().setText("Transferencia completada, " + ficheroDestino.getName());
-                            //escritorFichero.close();
-                            //entradaCliente.close();
-
+                            cliente.getbSubir().setEnabled(true);
+                            cliente.getbRefrescar().setEnabled(true);
+                            cliente.getbDescargar().setEnabled(true);
                             System.out.println(ficheroDestino.getName());
-
-                            //escritorFichero.close();
-                            //entradaCliente.close();
 
                         } catch (IOException ex) {
                             throw new RuntimeException(ex);
@@ -266,35 +260,6 @@ public class Controlador implements ActionListener {
 
                 workerDescargar.execute();
 
-
-                /*JFileChooser descarga = new JFileChooser();
-                int evt = descarga.showSaveDialog(null);
-                if (evt == JFileChooser.APPROVE_OPTION) {
-                    SwingWorker<List<Transferencia>, Void> workerSubir = new SwingWorker<List<Transferencia>, Void>() {
-                        @Override
-                        protected List<Transferencia> doInBackground() throws Exception {
-                                fichDescarga = descarga.getSelectedFile();
-
-                            return lista;
-                        }
-
-                        @Override
-                        protected void done() {
-                            try {
-                                for(int i=0; i < lista.size(); i++){
-                                    DefaultListModel modelo = new DefaultListModel();
-                                    cliente.getList1().setModel(listModel);
-                                    modelo.addElement(lista.get(i).getNombre());
-                                    cliente.getList1().setModel(modelo);
-                                }
-
-                            } catch (Exception ex) {
-                                ex.printStackTrace();
-                            }
-                        }
-                    };
-
-                }*/
                 break;
             case "Refrescar":
                 //Mandar mensaje Refrescar al servidor para que sepa que lo hemos mandado
