@@ -109,6 +109,8 @@ public class HiloCliente extends Thread {
                                 System.out.println("Creado objeto output");
                                 //Se envía el objeto lista al cliente
                                 salidaServidor.writeObject(lista);
+                                //Debería ponerse este reset como pone en la práctica, pero funciona sin el
+                                //Al ponerlo falla
                                 //salidaServidor.reset();
 
                             } catch (Exception e) {

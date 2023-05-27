@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+//Clase que recoge los botones que se pulsan en las dos GUIs
 public class Controlador implements ActionListener {
     private Servidor servidor;
     private Cliente cliente;
@@ -41,6 +42,7 @@ public class Controlador implements ActionListener {
         servidor.getbIniciar().addActionListener(listener);
     }
 
+    //Función para agregar un número y un guión delante de un nombre de archivo si ya existe
     private String agregarNumeroAlNombre(String nombreArchivo) {
         String nuevoNombre = nombreArchivo;
         int contador = 1;
@@ -48,9 +50,10 @@ public class Controlador implements ActionListener {
         // Verificar si el archivo con el nombre original existe
         while (new File(nuevoNombre).exists()) {
             int indicePunto = nombreArchivo.lastIndexOf('.');
-
+            //Si tiene extension, le agregamos el número y la extension
             if (indicePunto != -1) {
                 nuevoNombre = contador + "-" + nombreArchivo.substring(0, indicePunto) + nombreArchivo.substring(indicePunto);
+            //Si no tiene extension, le agregamos el número solamente
             } else {
                 nuevoNombre = contador +  "-" + nombreArchivo;
             }
@@ -63,6 +66,7 @@ public class Controlador implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
+        //Cogemos el boton pulsado
         String elige=e.getActionCommand();
         switch (elige){
             case "Iniciar":
@@ -73,10 +77,14 @@ public class Controlador implements ActionListener {
                             ServerSocket serverSocket = new ServerSocket(55555);
                             do {
                                 System.out.println("Se inicia el servidor");
+                                //Nos quedamos a la espera de que un cliente se conecte
                                 socket= serverSocket.accept();
+                                //Le creamos un hilo al cliente
                                 HiloCliente hiloCliente = new HiloCliente(socket, lista);
                                 System.out.println("Cliente conectado");
+                                //Empezamos el hilo creado
                                 hiloCliente.start();
+                                //Volvemos al accept al estar en un bucle do-while
                             }while (!serverSocket.isClosed());
                         } catch (IOException ioException) {
                             ioException.printStackTrace();
@@ -87,28 +95,21 @@ public class Controlador implements ActionListener {
 
                     @Override
                     protected void done() {
-//                        try {
-//                            for(int i=0; i < lista.size(); i++){
-//                                DefaultListModel modelo = new DefaultListModel();
-//                                cliente.getList1().setModel(listModel);
-//                                modelo.addElement(lista.get(i).getNombre());
-//                                cliente.getList1().setModel(modelo);
-//                            }
-//
-//                        } catch (Exception ex) {
-//                            ex.printStackTrace();
-//                        }
+//                    //No ponemos nada en el done porque haciendo lo anterior en el doInBackground
+//                    //Ya no se nos bloquea el botón iniciar, que es lo que queríamos
                     }
                 };
+                //Ejecuto el swingworker
                 worker.execute();
                 break;
             case "Conectar":
+                //Creo un hilo al darle a conectar como pide la práctica
                 Thread hilo = new Thread(() -> {
                     try {
                         //Leer ip de la gui
                         System.out.println(cliente.gettextfIp().getText());
                         socket = new Socket(cliente.gettextfIp().getText(),55555);
-                        //Si hacemos esto puede que no nos aseguremos de que realmente esté creado el input y outputstream
+                        //Activamos los botones
                         cliente.getbSubir().setEnabled(true);
                         cliente.getbDescargar().setEnabled(true);
                         cliente.getbRefrescar().setEnabled(true);
@@ -132,6 +133,7 @@ public class Controlador implements ActionListener {
                 break;
 
             case "Subir":
+                //Envio la señal al servidor para que comience su subir
                 salidaClientePrint.println("Subir");
                 SwingWorker<List<Transferencia>, Void> workerSubir = new SwingWorker<List<Transferencia>, Void>() {
                     @Override
